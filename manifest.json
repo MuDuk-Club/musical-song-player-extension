@@ -1,0 +1,29 @@
+{
+    "manifest_version": 3,
+    "name": "뮤지컬 넘버 컬렉션",
+    "description": "뮤지컬 넘버를 검색하고 즐겨찾기할 수 있는 Chrome 확장 프로그램",
+    "version": "1.0",
+    "permissions": [
+      "storage",
+      "tabs"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_popup": "popup.html",
+      "default_title": "뮤지컬 넘버 컬렉션"
+    },
+    "host_permissions": [
+      "https://www.youtube.com/*",
+      "https://img.youtube.com/*",
+      "https://www.youtube.com/oembed*"
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": ["musical-songs.json"],
+        "matches": ["<all_urls>"]
+      }
+    ]
+  }
+  
