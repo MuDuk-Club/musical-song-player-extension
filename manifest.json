@@ -3,16 +3,24 @@
     "name": "뮤지컬 넘버 컬렉션",
     "description": "뮤지컬 넘버를 검색하고 즐겨찾기할 수 있는 Chrome 확장 프로그램",
     "version": "1.0",
+    "icons": {
+      "16": "images/img.png",
+      "32": "images/img.png",
+      "48": "images/img.png",
+      "128": "images/img.png"
+    },
     "permissions": [
       "storage",
-      "tabs"
+      "tabs",
+      "scripting"
     ],
     "background": {
       "service_worker": "background.js"
     },
     "action": {
       "default_popup": "popup.html",
-      "default_title": "뮤지컬 넘버 컬렉션"
+      "default_title": "뮤지컬 넘버 컬렉션",
+      "default_icon": "images/img.png"
     },
     "host_permissions": [
       "https://www.youtube.com/*",
