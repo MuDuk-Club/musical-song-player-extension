@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>뮤지컬 넘버 컬렉션</title>
+    <script src="popup.js" defer></script>
+    <style>
+      body {
+        width: 400px;
+        height: 600px;
+        margin: 0;
+        padding: 15px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        overflow: hidden;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      /* Section 1: Search Bar */
+      .search-section {
+        margin-bottom: 15px;
+      }
+
+      .search-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 12px 40px 12px 15px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-icon {
+        position: absolute;
+        right: 15px;
+        color: #666;
+        font-size: 16px;
+      }
+
+      /* Section 2: Tag Filters */
+      .filter-section {
+        margin-bottom: 15px;
+        max-height: 120px;
+        overflow-y: auto;
+      }
+
+      .filter-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 0;
+      }
+
+      .filter-tag {
+        padding: 6px 12px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 12px;
+      }
+
+      .filter-tag:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .filter-tag.active {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: white;
+      }
+
+      /* Section 3: Number List */
+      .list-section {
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .song-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .song-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        margin: 8px 0;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .song-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+      }
+
+      .song-thumbnail {
+        width: 60px;
+        height: 45px;
+        border-radius: 8px;
+        margin-right: 12px;
+        object-fit: cover;
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .song-info {
+        flex: 1;
+        text-align: left;
+      }
+
+      .song-title {
+        font-weight: bold;
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
+
+      .song-description {
+        font-size: 12px;
+        opacity: 0.8;
+        margin-bottom: 4px;
+      }
+
+      .song-hashtags {
+        font-size: 11px;
+        opacity: 0.6;
+      }
+
+      .song-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .play-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+      }
+
+      .play-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+      }
+
+      .favorite-btn {
+        background: none;
+        border: none;
+        color: #ff6b6b;
+        cursor: pointer;
+        font-size: 18px;
+        transition: all 0.3s ease;
+      }
+
+      .favorite-btn:hover {
+        transform: scale(1.2);
+      }
+
+      .favorite-btn.active {
+        color: #ff4757;
+      }
+
+      /* Scrollbar Styling */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      /* Loading Animation */
+      .loading {
+        text-align: center;
+        padding: 20px;
+        opacity: 0.7;
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Section 1: Search Bar -->
+      <div class="search-section">
+        <div class="search-container">
+          <input type="text" class="search-input" placeholder="뮤지컬 넘버 검색..." id="searchInput">
+          <span class="search-icon">🔍</span>
+        </div>
+      </div>
+
+      <!-- Section 2: Tag Filters -->
+      <div class="filter-section">
+        <div class="filter-container" id="filterContainer">
+          <div class="filter-tag active" data-filter="all">전체</div>
+          <div class="filter-tag" data-filter="뮤지컬별">뮤지컬별</div>
+          <div class="filter-tag" data-filter="기분별">기분별</div>
+          <div class="filter-tag" data-filter="favorite">즐겨찾기</div>
+        </div>
+      </div>
+
+      <!-- Section 3: Number List -->
+      <div class="list-section">
+        <ul class="song-list" id="songList">
+          <!-- Songs will be loaded here dynamically -->
+        </ul>
+      </div>
+    </div>
+
+
+  </body>
+</html>
