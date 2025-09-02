@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>뮤지컬 넘버 컬렉션 - 테스트</title>
+    <style>
+      body {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        min-height: 100vh;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      /* Section 1: Search Bar */
+      .search-section {
+        margin-bottom: 15px;
+      }
+
+      .search-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 12px 40px 12px 15px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-icon {
+        position: absolute;
+        right: 15px;
+        color: #666;
+        font-size: 16px;
+      }
+
+      /* Section 2: Tag Filters */
+      .filter-section {
+        margin-bottom: 15px;
+        max-height: 120px;
+        overflow-y: auto;
+      }
+
+      .filter-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 0;
+      }
+
+      .filter-tag {
+        padding: 6px 12px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 12px;
+      }
+
+      .filter-tag:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .filter-tag.active {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: white;
+      }
+
+      /* Section 3: Number List */
+      .list-section {
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .song-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .song-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        margin: 8px 0;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .song-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+      }
+
+      .song-thumbnail {
+        width: 60px;
+        height: 45px;
+        border-radius: 8px;
+        margin-right: 12px;
+        object-fit: cover;
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .song-info {
+        flex: 1;
+        text-align: left;
+      }
+
+      .song-title {
+        font-weight: bold;
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
+
+      .song-description {
+        font-size: 12px;
+        opacity: 0.8;
+        margin-bottom: 4px;
+      }
+
+      .song-hashtags {
+        font-size: 11px;
+        opacity: 0.6;
+      }
+
+      .song-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .play-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+      }
+
+      .play-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+      }
+
+      .favorite-btn {
+        background: none;
+        border: none;
+        color: #ff6b6b;
+        cursor: pointer;
+        font-size: 18px;
+        transition: all 0.3s ease;
+      }
+
+      .favorite-btn:hover {
+        transform: scale(1.2);
+      }
+
+      .favorite-btn.active {
+        color: #ff4757;
+      }
+
+      /* Scrollbar Styling */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      /* Loading Animation */
+      .loading {
+        text-align: center;
+        padding: 20px;
+        opacity: 0.7;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 2em;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>🎭 뮤지컬 넘버 컬렉션</h1>
+        <p>좋아하는 뮤지컬 넘버를 찾아보세요!</p>
+      </div>
+
+      <!-- Section 1: Search Bar -->
+      <div class="search-section">
+        <div class="search-container">
+          <input type="text" class="search-input" placeholder="뮤지컬 넘버 검색..." id="searchInput">
+          <span class="search-icon">🔍</span>
+        </div>
+      </div>
+
+      <!-- Section 2: Tag Filters -->
+      <div class="filter-section">
+        <div class="filter-container" id="filterContainer">
+          <div class="filter-tag active" data-filter="all">전체</div>
+          <div class="filter-tag" data-filter="뮤지컬별">뮤지컬별</div>
+          <div class="filter-tag" data-filter="기분별">기분별</div>
+          <div class="filter-tag" data-filter="favorite">즐겨찾기</div>
+        </div>
+      </div>
+
+      <!-- Section 3: Number List -->
+      <div class="list-section">
+        <ul class="song-list" id="songList">
+          <!-- Songs will be loaded here dynamically -->
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // 뮤지컬 노래 데이터 (로컬에 포함)
+      const musicalSongs = [
+        {
+          "url": "https://youtu.be/ih_6JF51Yd4",
+          "tag": "기분별",
+          "description": "대중픽 넘버 플리"
+        },
+        {
+          "url": "https://youtu.be/eY1TwpOgCGo",
+          "tag": "기분별",
+          "description": "웅장한 넘버 플리2"
+        },
+        {
+          "url": "https://youtu.be/Uim-KF5hx0g",
+          "tag": "뮤지컬별",
+          "description": "하데스타운 1막"
+        },
+        {
+          "url": "https://youtu.be/_-FyQsyMpgs",
+          "tag": "뮤지컬별",
+          "description": "하데스타운 2막"
+        },
+        {
+          "url": "https://youtu.be/wW6HGYoaFnE",
+          "tag": "뮤지컬별",
+          "description": "베토벤 시즌1"
+        },
+        {
+          "url": "https://youtu.be/uf6Klj2Zmpo",
+          "tag": "뮤지컬별",
+          "description": "베토벤 시즌2"
+        },
+        {
+          "url": "https://youtu.be/zXhapcCfrOU",
+          "tag": "뮤지컬별",
+          "description": "드라큘라"
+        },
+        {
+          "url": "https://youtu.be/XaV9UVKLxTg",
+          "tag": "뮤지컬별",
+          "description": "영웅"
+        },
+        {
+          "url": "https://youtu.be/YH4S89ecKaA",
+          "tag": "뮤지컬별",
+          "description": "헤드윅"
+        },
+        {
+          "url": "https://youtu.be/1PnVtVf23k8",
+          "tag": "뮤지컬별",
+          "description": "데스노트"
+        },
+        {
+          "url": "https://youtu.be/HWF0mj2Hz4E",
+          "tag": "뮤지컬별",
+          "description": "웃는 남자 박효신 플리"
+        }
+      ];
+
+      // 전역 변수
+      let currentFilter = 'all';
+      let searchQuery = '';
+      let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+      // DOM 요소들
+      const searchInput = document.getElementById('searchInput');
+      const filterContainer = document.getElementById('filterContainer');
+      const songList = document.getElementById('songList');
+
+      // 초기화
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM 로드 완료");
+        
+        // DOM 요소 확인
+        if (!searchInput || !filterContainer || !songList) {
+          console.error("필수 DOM 요소를 찾을 수 없습니다:", {
+            searchInput: !!searchInput,
+            filterContainer: !!filterContainer,
+            songList: !!songList
+          });
+          return;
+        }
+        
+        loadMusicalSongs();
+        initializeEventListeners();
+      });
+
+      // 뮤지컬 노래 데이터 로드
+      async function loadMusicalSongs() {
+        try {
+          console.log("뮤지컬 노래 데이터 로드 시작");
+          songList.innerHTML = '<div class="loading">데이터를 불러오는 중...</div>';
+          
+          // 로컬 데이터 사용
+          console.log("로드된 노래 데이터:", musicalSongs);
+          
+          // 초기 렌더링 (제목 없이)
+          renderSongList();
+          
+          // 각 노래의 제목을 YouTube API에서 가져오기
+          await loadVideoTitles();
+          
+        } catch (error) {
+          console.error('뮤지컬 노래 데이터 로드 실패:', error);
+          songList.innerHTML = '<div class="loading">데이터를 불러오는 중 오류가 발생했습니다: ' + error.message + '</div>';
+        }
+      }
+
+      // URL에서 videoId 추출하는 함수
+      function parseYouTubeUrl(url) {
+        try {
+          const urlObj = new URL(url);
+          let videoId = '';
+
+          // youtu.be 형식 처리
+          if (urlObj.hostname === 'youtu.be') {
+            videoId = urlObj.pathname.substring(1); // '/' 제거
+          } 
+          // youtube.com 형식 처리
+          else if (urlObj.hostname.includes('youtube.com')) {
+            videoId = urlObj.searchParams.get('v');
+          }
+          
+          return { videoId };
+        } catch (error) {
+          console.error('URL 파싱 오류:', error);
+          return { videoId: '' };
+        }
+      }
+
+      // YouTube oEmbed API를 사용하여 제목 가져오기 (CORS 프록시 사용)
+      async function loadVideoTitles() {
+        console.log("YouTube 제목 로드 시작");
+        
+        for (let i = 0; i < musicalSongs.length; i++) {
+          const song = musicalSongs[i];
+          try {
+            console.log(`처리 중: ${i + 1}/${musicalSongs.length} - ${song.url}`);
+            
+            // URL에서 videoId 추출
+            const { videoId } = parseYouTubeUrl(song.url);
+            song.videoId = videoId;
+            
+            if (!videoId) {
+              console.error('videoId를 추출할 수 없습니다:', song.url);
+              song.title = `잘못된 URL: ${song.url}`;
+              continue;
+            }
+            
+            // 썸네일 URL 생성
+            song.thumbnail = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+            
+            // CORS 프록시를 사용하여 YouTube oEmbed API 호출
+            const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+            const corsProxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(oembedUrl)}`;
+            
+            // 타임아웃이 있는 fetch 함수
+            const fetchWithTimeout = async (url, timeout = 8000) => {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), timeout);
+              
+              try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                return response;
+              } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+              }
+            };
+            
+            const response = await fetchWithTimeout(corsProxyUrl);
+            
+            if (response.ok) {
+              const data = await response.json();
+              song.title = data.title;
+              console.log(`제목 로드 성공: ${song.title} (${videoId})`);
+            } else {
+              // API 실패 시 기본 제목 사용
+              song.title = song.description || `뮤지컬 넘버 (${videoId})`;
+              console.log(`제목 로드 실패 (${response.status}), 기본 제목 사용: ${song.description}`);
+            }
+          } catch (error) {
+            console.error(`제목 로드 오류 (${song.url}):`, error);
+            song.title = song.description || `뮤지컬 넘버 (${song.videoId || '알 수 없음'})`;
+          }
+          
+          // 각 노래 처리 후 즉시 렌더링 업데이트
+          renderSongList();
+        }
+        
+        console.log("YouTube 제목 로드 완료");
+      }
+
+      // 이벤트 리스너 초기화
+      function initializeEventListeners() {
+        // 검색 기능
+        searchInput.addEventListener('input', function(e) {
+          searchQuery = e.target.value.toLowerCase();
+          renderSongList();
+        });
+
+        // 필터 기능
+        filterContainer.addEventListener('click', function(e) {
+          if (e.target.classList.contains('filter-tag')) {
+            // 활성 필터 변경
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+              tag.classList.remove('active');
+            });
+            e.target.classList.add('active');
+            
+            currentFilter = e.target.getAttribute('data-filter');
+            renderSongList();
+          }
+        });
+      }
+
+      // 노래 목록 렌더링
+      function renderSongList() {
+        const filteredSongs = getFilteredSongs();
+        
+        songList.innerHTML = '';
+        
+        if (filteredSongs.length === 0) {
+          songList.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+          return;
+        }
+
+        // 로딩이 완료된 노래만 필터링 (제목이 있고 기본 제목이 아닌 것)
+        const loadedSongs = filteredSongs.filter(song => 
+          song.title && 
+          !song.title.includes('뮤지컬 넘버 (') && 
+          !song.title.includes('잘못된 URL')
+        );
+        
+        if (loadedSongs.length === 0) {
+          songList.innerHTML = '<div class="loading">YouTube 제목을 불러오는 중...</div>';
+          return;
+        }
+
+        loadedSongs.forEach(song => {
+          const songElement = createSongElement(song);
+          songList.appendChild(songElement);
+        });
+      }
+
+      // 필터링된 노래 목록 가져오기
+      function getFilteredSongs() {
+        let filtered = musicalSongs;
+
+        // 검색 필터링
+        if (searchQuery) {
+          filtered = filtered.filter(song => 
+            song.title && song.title.toLowerCase().includes(searchQuery) ||
+            song.tag.toLowerCase().includes(searchQuery)
+          );
+        }
+
+        // 태그 필터링
+        if (currentFilter !== 'all') {
+          if (currentFilter === 'favorite') {
+            filtered = filtered.filter(song => song.title && favorites.includes(song.title));
+          } else {
+            filtered = filtered.filter(song => song.tag === currentFilter);
+          }
+        }
+
+        return filtered;
+      }
+
+      // 노래 요소 생성
+      function createSongElement(song) {
+        const li = document.createElement('li');
+        li.className = 'song-item';
+        
+        const isFavorite = song.title ? favorites.includes(song.title) : false;
+        
+        li.innerHTML = `
+          <img src="${song.thumbnail || ''}" alt="${song.title || '제목 없음'}" class="song-thumbnail" onerror="this.style.display='none'">
+          <div class="song-info">
+            <div class="song-title">${song.title || song.description}</div>
+            <div class="song-description">태그: ${song.tag}</div>
+            <div class="song-hashtags">#${song.tag} #뮤지컬</div>
+          </div>
+          <div class="song-actions">
+            <button class="play-btn" data-video-id="${song.videoId || ''}" data-title="${song.title || song.description}" data-url="${song.url}">▶</button>
+            <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-song-title="${song.title || song.description}">${isFavorite ? '❤️' : '🤍'}</button>
+          </div>
+        `;
+
+        // 재생 버튼 이벤트
+        const playBtn = li.querySelector('.play-btn');
+        playBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const videoId = this.getAttribute('data-video-id');
+          const title = this.getAttribute('data-title');
+          const url = this.getAttribute('data-url');
+          
+          if (videoId) {
+            openYouTubeInNewTab(videoId, title);
+          } else if (url) {
+            // videoId가 없으면 원본 URL로 열기
+            window.open(url, '_blank');
+          } else {
+            alert('비디오를 열 수 없습니다.');
+          }
+        });
+
+        // 즐겨찾기 버튼 이벤트
+        const favoriteBtn = li.querySelector('.favorite-btn');
+        favoriteBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const songTitle = this.getAttribute('data-song-title');
+          toggleFavorite(songTitle, this);
+        });
+
+        return li;
+      }
+
+      // YouTube 새 탭에서 열기
+      function openYouTubeInNewTab(videoId, title) {
+        console.log("YouTube 새 탭 열기:", { videoId, title });
+        
+        const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        window.open(youtubeUrl, '_blank');
+      }
+
+      // 즐겨찾기 토글
+      function toggleFavorite(songTitle, buttonElement) {
+        const index = favorites.indexOf(songTitle);
+        
+        if (index > -1) {
+          // 즐겨찾기에서 제거
+          favorites.splice(index, 1);
+          buttonElement.textContent = '🤍';
+          buttonElement.classList.remove('active');
+        } else {
+          // 즐겨찾기에 추가
+          favorites.push(songTitle);
+          buttonElement.textContent = '❤️';
+          buttonElement.classList.add('active');
+        }
+        
+        // 로컬 스토리지에 저장
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+      }
+    </script>
+  </body>
+</html> 
