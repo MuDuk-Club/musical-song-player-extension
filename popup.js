@@ -76,14 +76,14 @@ function parseYouTubeUrl(url) {
   }
 }
 
-// YouTube oEmbed API를 사용하여 제목 가져오기
+// YouTube oEmbed API를 사용하여 제목 가져오기 (병렬 처리)
 async function loadVideoTitles() {
   console.log("YouTube 제목 로드 시작");
   
-  for (let i = 0; i < musicalSongs.length; i++) {
-    const song = musicalSongs[i];
+  // 모든 노래를 병렬로 처리
+  const promises = musicalSongs.map(async (song, index) => {
     try {
-      console.log(`처리 중: ${i + 1}/${musicalSongs.length} - ${song.url}`);
+      console.log(`처리 중: ${index + 1}/${musicalSongs.length} - ${song.url}`);
       
       // URL에서 videoId 추출
       const { videoId } = parseYouTubeUrl(song.url);
@@ -91,32 +91,18 @@ async function loadVideoTitles() {
       
       if (!videoId) {
         console.error('videoId를 추출할 수 없습니다:', song.url);
-        song.title = `잘못된 URL: ${song.url}`;
-        continue;
+        song.title = song.description || `잘못된 URL: ${song.url}`;
+        return;
       }
       
       // 썸네일 URL 생성
       song.thumbnail = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
       
-      // YouTube oEmbed API로 제목 가져오기 (타임아웃 추가)
+      // Chrome 확장 프로그램에서 직접 YouTube oEmbed API 호출
       const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
       
-      // 타임아웃이 있는 fetch 함수
-      const fetchWithTimeout = async (url, timeout = 5000) => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
-        
-        try {
-          const response = await fetch(url, { signal: controller.signal });
-          clearTimeout(timeoutId);
-          return response;
-        } catch (error) {
-          clearTimeout(timeoutId);
-          throw error;
-        }
-      };
-      
-      const response = await fetchWithTimeout(oembedUrl);
+      // Chrome 확장 프로그램은 manifest.json의 host_permissions로 직접 API 호출 가능
+      const response = await fetch(oembedUrl);
       
       if (response.ok) {
         const data = await response.json();
@@ -124,17 +110,20 @@ async function loadVideoTitles() {
         console.log(`제목 로드 성공: ${song.title} (${videoId})`);
       } else {
         // API 실패 시 기본 제목 사용
-        song.title = `뮤지컬 넘버 (${videoId})`;
-        console.log(`제목 로드 실패 (${response.status}), 기본 제목 사용: ${videoId}`);
+        song.title = song.description || `뮤지컬 넘버 (${videoId})`;
+        console.log(`제목 로드 실패 (${response.status}), 기본 제목 사용: ${song.description}`);
       }
     } catch (error) {
       console.error(`제목 로드 오류 (${song.url}):`, error);
-      song.title = `뮤지컬 넘버 (${song.videoId || '알 수 없음'})`;
+      song.title = song.description || `뮤지컬 넘버 (${song.videoId || '알 수 없음'})`;
     }
-    
-    // 각 노래 처리 후 즉시 렌더링 업데이트
-    renderSongList();
-  }
+  });
+  
+  // 모든 요청을 병렬로 실행
+  await Promise.allSettled(promises);
+  
+  // 모든 처리 완료 후 렌더링
+  renderSongList();
   
   console.log("YouTube 제목 로드 완료");
 }
@@ -228,8 +217,7 @@ function createSongElement(song) {
     <img src="${song.thumbnail}" alt="${song.title}" class="song-thumbnail" onerror="this.style.display='none'">
     <div class="song-info">
       <div class="song-title">${song.title}</div>
-      <div class="song-description">태그: ${song.tag}</div>
-      <div class="song-hashtags">#${song.tag} #뮤지컬</div>
+      <div class="song-hashtags">#${song.tag} #${song.description}</div>
     </div>
     <div class="song-actions">
       <button class="play-btn" data-video-id="${song.videoId}" data-title="${song.title}" data-si="${song.si || ''}">▶</button>
