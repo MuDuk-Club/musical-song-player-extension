@@ -216,7 +216,7 @@ function createSongElement(song) {
   li.innerHTML = `
     <img src="${song.thumbnail}" alt="${song.title}" class="song-thumbnail" onerror="this.style.display='none'">
     <div class="song-info">
-      <div class="song-title">${song.title}</div>
+      <div class="song-title">${song.title}</div
       <div class="song-hashtags">#${song.tag} #${song.description}</div>
     </div>
     <div class="song-actions">
